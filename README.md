@@ -35,8 +35,6 @@ Poker is a popular card game that combines skill, strategy, and luck. There have
    - Similar dataset of recorded multiplayer NLHE games, but cannot view other players’ cards.
    - Can be used as additional data for performance evaluation.
 
-- After downloading the datasets, ensure they are placed in the `data/` directory to match the expected file structure.
-
 ### Method:
 
 #### Data Analysis and Preprocessing:
@@ -98,13 +96,16 @@ We anticipate developing a model that can accurately classify poker hands and ma
 
 - Complete and submit final report
 
+## Requirements
+
+- After downloading datasets, ensure they are placed in `data/` directory to match the expected file structure
+- Create virtual environment: `python -m venv myenv`
+- To activate (bash/zsh): `source myenv/Scripts/activate`
+- To deactivate: `deactivate`
+- In virtual environment: `pip install pandas numpy scikit-learn tensorflow jupyter`
+
 ## References:
 
 - https://ai.meta.com/blog/pluribus-first-ai-to-beat-pros-in-6-player-poker/
 - https://www.youtube.com/watch?v=2dX0lwaQRX0
 - https://www.science.org/doi/10.1126/science.aay2400
-
-## Contributions:
-
-- **Rusheel**: Contributed to the proposal writing, including sections on background, dataset, method, and project plan. Prepared the initial draft of the proposal prompt.
-- **Jake**: Researched initial datasets and methodology, defined the project scope. Ensured overall structure of the proposal, aligns with the rubric. Finalized proposal draft.
