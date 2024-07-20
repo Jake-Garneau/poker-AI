@@ -7,7 +7,7 @@
 
 ## Overview:
 
-This project aims to analyze poker game data and develop a neural network model capable of playing no-limit Texas hold’em (NLHE) poker. We will use a dataset of tracked poker games released by the Pluribus (Poker bot built by Facebook's AI Lab and Carnegie Mellon University) research team to train and evaluate our model.
+This project aims to analyze poker game data and develop a neural network model capable of playing no-limit Texas hold’em (NLHE) poker. We will use a dataset of tracked poker games released by the Pluribus (Poker bot built by Facebook's AI Lab and Carnegie Mellon University) research team to train and evaluate our model, and then a similar Kaggle dataset of recorded poker games to further validate its performance.
 
 ## Background:
 
@@ -17,23 +17,15 @@ Poker is a popular card game that combines skill, strategy, and luck. There have
 
 ### Datasets:
 
-1. **[UCI Machine Learning Repository - Poker Hand Dataset](https://archive.ics.uci.edu/dataset/158/poker+hand)**
-
-   - Contains 1,025,010 instances of poker hands with 11 attributes: 10 for the cards and 1 for the hand class.
-   - Already partitioned into training and test sets.
-   - Preliminary inspection indicates that the dataset includes labeled data for classification, where each class represents a different poker hand rank.
-   - We will perform preprocessing steps such as normalization and data augmentation to enhance the model's performance.
-
-2. **[Pluribus AI Hands Dataset](http://kevinwang.us/lets-analyze-pluribuss-hands/)**
+1. **[Pluribus AI Hands Dataset](http://kevinwang.us/lets-analyze-pluribuss-hands/)**
 
    - Comprises 10,000 recorded games from Pluribus, an advanced poker AI.
    - Includes detailed information on player actions, betting rounds, positions, stack sizes, and game outcomes.
    - Provides a rich contextual basis for training a poker AI, capturing dynamic game scenarios and strategic decisions.
    - We will perform preprocessing steps such as data normalization, feature engineering (e.g., calculating hand strength, pot odds), and data augmentation to enhance the model's performance.
 
-3. **[Kaggle - Poker Hold’em Games Dataset](https://www.kaggle.com/datasets/smeilz/poker-holdem-games/data)**
+2. **[Kaggle - Poker Hold’em Games Dataset](https://www.kaggle.com/datasets/smeilz/poker-holdem-games/data)**
    - Similar dataset of recorded multiplayer NLHE games, but cannot view other players’ cards.
-   - Can be used as additional data for performance evaluation.
 
 ### Method:
 
@@ -45,23 +37,48 @@ Poker is a popular card game that combines skill, strategy, and luck. There have
 
 #### Model Development:
 
-- Develop a baseline neural network model to predict player actions based on the game state.
-- Explore advanced techniques, including convolutional neural networks (CNN) for feature extraction and reinforcement learning for strategy optimization.
+##### Implement Pre-Existing Poker Libraries:
+
+- **[Deuces](https://github.com/worldveil/deuces)**: written for the MIT Pokerbots Competition, used to evaluate poker hands of 2 and 5-7, useful for evaluating Texas Holdem hands from pre-flop to river.
+- **[Pokerkit](https://github.com/uoftcprg/pokerkit)**: an open-source software library for simulating games, evaluating hands, and facilitating statistical analysis, developed by the University of Toronto Computer Poker Student Research Group.
+
+##### Using Both Datasets
+
+- Rotate through training and validation sets of both pluribus and kaggle recorded games, so that each is used for training/validation/testing, then average the results
+
+##### Logistic Regression
+
+- Implement a logistic regression model as our initial baseline model.
+- Use the scikit-learn library to develop and train this model.
+
+##### Multi-Layer Perceptron (MLP):
+
+- Implement a multi-layer perceptron using TensorFlow library.
+- Configure the neural network with an appropriate number of layers and neurons.
+- Train the MLP model on the training dataset.
+
+##### Ensemble Method:
+
+- Implement gradient boosting and/or random forest.
+- Use the scikit-learn library to develop and train this model.
 
 #### Model Training and Evaluation:
 
 - Train the baseline model using the training set.
+- To use as baseline/compare against other AI
+  - https://github.com/dickreuter/Poker - poker bot with strategy analyzer and strategy editor
+  - https://github.com/fedden/poker_ai - another open-source poker bot
 - Evaluate the model using standard metrics (e.g., accuracy, F1-score) and poker-specific metrics (e.g., win rate, average returns).
 - Implement and test advanced models, comparing their performance to the baseline.
 
 #### Simulation and Testing:
 
-- Simulate poker games using the trained models to evaluate performance in realistic scenarios.
+- Simulate poker games using the trained models and other AI to evaluate performance in realistic scenarios.
 - Analyze the AI’s decision-making and strategic behavior in various game contexts.
 
 ### Outcome and Performance Evaluation:
 
-We anticipate developing a model that can accurately classify poker hands and make strategic decisions in a simulated poker environment. The success of the project will be measured by the model's classification accuracy, computational efficiency, and its performance in simulated poker games against other AI opponents. We will use metrics such as win rate and average returns to evaluate the AI's poker-playing performance.
+We anticipate developing a model that can accurately make strategic decisions in a simulated poker environment. The success of the project will be measured by the model's computational efficiency, and its performance in simulated poker games against other AI opponents and itself. We will use metrics such as win rate and average returns to evaluate the AI's poker-playing performance.
 
 ## Project Plan:
 
@@ -74,7 +91,9 @@ We anticipate developing a model that can accurately classify poker hands and ma
 
 - Set up project environment
 - Define project objectives and methodology
-- Preprocess dataset (normalization, feature engineering)
+- Preprocess dataset
+- Setup PostgreSQL to store datasets
+- Set up poker-specific libraries:
 
 ### By July 20 (First Project Report Due):
 
@@ -103,9 +122,11 @@ We anticipate developing a model that can accurately classify poker hands and ma
 - To activate (bash/zsh): `source myenv/Scripts/activate`
 - To deactivate: `deactivate`
 - In virtual environment: `pip install pandas numpy scikit-learn tensorflow jupyter`
+- Make sure to select venv as Python interpreter
 
 ## References:
 
 - https://ai.meta.com/blog/pluribus-first-ai-to-beat-pros-in-6-player-poker/
 - https://www.youtube.com/watch?v=2dX0lwaQRX0
 - https://www.science.org/doi/10.1126/science.aay2400
+- https://pokercopilot.com/essential-poker-statistics
