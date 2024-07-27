@@ -1,69 +1,137 @@
 import pandas as pd
-import re
 
-df = pd.read_csv('../data/pluribus_parsed.csv')
-
-print("Columns in the DataFrame:", df.columns)
+df = pd.read_csv("../data/pluribus_test.csv")
 
 player_stats = {}
+big_blind = 100
+small_blind = 50
 
-def init_player_stats(player_name):
-    return {
-        "VPIP_count": 0,
-        "PFR_count": 0,
-        "total_hands": 0,
-        "aggression_count": 0,
-        "post_flop_actions": 0,
-        "winnings": 0
-    }
+def update_stats(player, stat_type, value=1):
+    if player not in player_stats:
+        player_stats[player] = {
+            "total_hands": 0,
+            "total_hands_played": 0,
+            "hands_vpip": 0,
+            "hands_pfr": 0,
+            "bets": 0,
+            "raises": 0,
+            "calls": 0,
+            "folds": 0,
+            "money_pip": 0,
+            "winnings": 0,
+            "walks": 0,
+            "total_hands_played_counted": False,
+            "hands_vpip_counted": False,
+            "hands_pfr_counted": False
+        }
+    player_stats[player][stat_type] += value
+    
+def update_action_stats(actions):
+    for action in actions:
+        action_parts = action.split(': ')
+        player = action_parts[0]
+        action_detail = action_parts[1] if len(action_parts) > 1 else ''
+        if('folds' in action_detail):
+            update_stats(player, 'folds')
+        elif 'bets' in action_detail:
+            amount = float(action_detail.split(' ')[1])
+            update_stats(player, 'bets')
+            update_stats(player, 'money_pip', amount)
+        elif 'raises' in action_detail:
+            amount = float(action_detail.split(' ')[1])
+            update_stats(player, 'raises')
+            update_stats(player, 'money_pip', amount)
+        elif 'calls' in action_detail:
+            amount = float(action_detail.split(' ')[1])
+            update_stats(player, 'calls')
+            update_stats(player, 'money_pip', amount)
+        elif 'uncalled bet' in action_detail:
+            amount = float(action_detail.split(' ')[2])
+            update_stats(player, 'money_pip', -amount)
 
-for index, row in df.iterrows():
-    if "players" in row:
-        players = row["players"].split(", ")
-        actions = row["actions"]
-        winner_info = row["winners"]
-
-        for player in players:
-            if player not in player_stats:
-                player_stats[player] = init_player_stats(player)
-            player_stats[player]["total_hands"] += 1
-
-        pre_flop_actions = re.findall(r"([a-zA-Z]+): (raises|calls|bets|folds|checks|posts)", actions)
-
-        for action in pre_flop_actions:
-            player, move = action
-            if player in player_stats:
-                if move in ["raises", "calls", "bets"]:
-                    player_stats[player]["VPIP_count"] += 1
-                if move == "raises":
-                    player_stats[player]["PFR_count"] += 1
-
-        post_flop_actions = re.findall(r"Stage: [A-Z]+, ([a-zA-Z]+): (bets|raises|folds|checks|calls)", actions)
+for _, row in df.iterrows():
+    players = row['players'].split(', ')
+    preflop_actions = row['preflop_actions'].split(', ')
+    flop_actions = row['flop_actions'].split(', ') if pd.notna(row['flop_actions']) else []
+    turn_actions = row['turn_actions'].split(', ') if pd.notna(row['turn_actions']) else []
+    river_actions = row['river_actions'].split(', ') if pd.notna(row['river_actions']) else []
+    winners = row['winners']
+    
+    for player in players:
+        update_stats(player, 'total_hands')
+        player_stats[player]['total_hands_played_counted'] = False
+        player_stats[player]['hands_vpip_counted'] = False
+        player_stats[player]['hands_pfr_counted'] = False
+    
+    for action in preflop_actions:
+        action_parts = action.split(': ')
+        player = action_parts[0]
+        action_detail = action_parts[1] if len(action_parts) > 1 else ''
         
-        for action in post_flop_actions:
-            player, move = action
-            if player in player_stats:
-                player_stats[player]["post_flop_actions"] += 1
-                if move in ["bets", "raises"]:
-                    player_stats[player]["aggression_count"] += 1
+        if 'posts' in action_detail:
+            if 'small blind' in action_detail:
+                update_stats(player, 'money_pip', small_blind)
+            else:
+                update_stats(player, 'money_pip', big_blind)
+            continue
+        elif 'folds' in action_detail:
+            update_stats(player, 'folds')
+        elif 'calls' in action_detail or 'raises' in action_detail:
+            amount = float(action_detail.split(' ')[1])
+            update_stats(player, 'money_pip', amount)
+            if(not player_stats[player]['total_hands_played_counted']):
+                update_stats(player, 'total_hands_played')
+                player_stats[player]['total_hands_played_counted'] = True
+            if(not player_stats[player]['hands_vpip_counted']):
+                update_stats(player, 'hands_vpip')
+                player_stats[player]['hands_vpip_counted'] = True
+            if 'raises' in action_detail:
+                if(not player_stats[player]['hands_pfr_counted']):
+                    update_stats(player, 'hands_pfr')
+                    player_stats[player]['hands_pfr_counted'] = True
+                update_stats(player, 'raises')
+            if 'calls' in action_detail:
+                update_stats(player, 'calls')
+                
+    update_action_stats(flop_actions)
+    update_action_stats(turn_actions)
+    update_action_stats(river_actions)
+    
+    if 'collected' in winners:
+        winner_parts = winners.split(': collected ')
+        player = winner_parts[0]
+        amount = float(winner_parts[1].split(' ')[0])
+        update_stats(player, 'winnings', amount)
+    
+    if len(preflop_actions) == 7 and all(['posts' or 'folds' in action for action in preflop_actions]):
+        big_blind_player = preflop_actions[1].split(': ')[0]
+        update_stats(big_blind_player, 'walks')
 
-        if winner_info:
-            winner_match = re.match(r"([a-zA-Z]+): collected ([\d\.]+)", winner_info)
-            if winner_match:
-                winner, amount = winner_match.groups()
-                amount = float(amount)
-                player_stats[winner]["winnings"] += amount
+for player, stats in player_stats.items():
+    if player == 'MrPink':
+        print(stats)
+    vpip_hands = stats['total_hands'] - stats['walks']
+    agg_div = stats['bets'] + stats['raises'] + stats['calls'] + stats['folds']
+    print(player + ' total hands played: ' + str(stats['total_hands_played']))
+    vpip = (stats['hands_vpip'] / vpip_hands) * 100 if vpip_hands > 0 else 0
+    pfr = (stats['hands_pfr'] / stats['total_hands_played']) * 100 if stats['total_hands_played'] > 0 else 0
+    agg = ((stats['bets'] + stats['raises']) / agg_div) * 100 if agg_div > 0 else 0
+    bb_won_per_100 = ((stats['winnings'] - stats['money_pip']) / big_blind) / stats['total_hands_played'] if stats['total_hands_played'] > 0 else 0
+        
+    player_stats[player].update({
+        'VPIP': vpip,
+        'PFR': pfr,
+        'Agg': agg,
+        'BB_won_per_100': bb_won_per_100
+    })
 
-with open('../data/player_stats_output.txt', 'w') as file:
+txt_file_path = '../data/player_stats.txt'
+
+with open(txt_file_path, mode='w') as file:
     for player, stats in player_stats.items():
-        total_hands = stats["total_hands"]
-        vpip = (stats["VPIP_count"] / total_hands) * 100 if total_hands > 0 else 0
-        pfr = (stats["PFR_count"] / total_hands) * 100 if total_hands > 0 else 0
-        aggression_factor = (stats["aggression_count"] / stats["post_flop_actions"]) * 100 if stats["post_flop_actions"] > 0 else 0
-        bb_won_per_100_hands = (stats["winnings"] / (total_hands * 100)) * 100 if total_hands > 0 else 0
-
         file.write(f"Player: {player}\n")
-        file.write(f"VPIP: {vpip:.2f}%\n")
-        file.write(f"PFR: {pfr:.2f}%\n")
-        file.write(f"Aggression Factor: {aggression_factor:.2f}%\n")
+        file.write(f"  VPIP: {stats['VPIP']:.2f}%\n")
+        file.write(f"  PFR: {stats['PFR']:.2f}%\n")
+        file.write(f"  Agg: {stats['Agg']:.2f}%\n")
+        file.write(f"  BB won per 100 hands: {stats['BB_won_per_100']:.2f}\n")
         file.write("\n")

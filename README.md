@@ -126,7 +126,14 @@ We anticipate developing a model that can accurately make strategic decisions in
 
 ## References:
 
-- https://ai.meta.com/blog/pluribus-first-ai-to-beat-pros-in-6-player-poker/
-- https://www.youtube.com/watch?v=2dX0lwaQRX0
-- https://www.science.org/doi/10.1126/science.aay2400
-- https://pokercopilot.com/essential-poker-statistics
+1. https://ai.meta.com/blog/pluribus-first-ai-to-beat-pros-in-6-player-poker/
+2. https://www.youtube.com/watch?v=2dX0lwaQRX0
+3. https://www.science.org/doi/10.1126/science.aay2400
+4. https://pokercopilot.com/essential-poker-statistics
+
+## Player Statistics from Reference 4
+
+- VPIP (Voluntarily put money in pot before flop): 15%-20% is ideal
+- PFR (Pre Flop Raise): 2%-3% less than VPIP is ideal
+- Agg (Aggression Factor): 50%-60% is ideal, more than that is excessive bluffing or overplaying speculative/bad hands
+- Big blinds won/100 hands: positive = winning over time, negative = losing over time

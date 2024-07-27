@@ -10,21 +10,36 @@ def parse_pluribus_txt(file_path):
     
     parsed_hands = []
     for hand in hands:
-        hand_details = {}
+        hand_details = {
+            'hand_id': '',
+            'flop_cards': [],
+            'turn_cards': [],
+            'river_cards': [],
+            'players': [],
+            'hole_cards': {},
+            'preflop_actions': [],
+            'flop_actions': [],
+            'turn_actions': [],
+            'river_actions': [],
+            'showdown_actions': [],
+            'winners': []
+        }
         
         hand_id = re.search(r'PokerStars Hand #(\d+):', hand)
         if hand_id:
             hand_details['hand_id'] = hand_id.group(1)
         
-        hand_details['flop'] = []
-        hand_details['turn'] = []
-        hand_details['river'] = []
+        flop_cards = re.search(r'\*\*\* FLOP \*\*\* \[(.*?)\]', hand)
+        if flop_cards:
+            hand_details['flop_cards'] = flop_cards.group(1).split()
+            
+        turn_card = re.search(r'\*\*\* TURN \*\*\* \[.*?\] \[(.*?)\]', hand)
+        if turn_card:
+            hand_details['turn_cards'] = [turn_card.group(1)]
         
-        community_cards = re.search(r'\*\*\* FLOP \*\*\* \[(.*?)\](?: \*\*\* TURN \*\*\* \[(.*?)\])?(?: \*\*\* RIVER \*\*\* \[(.*?)\])?', hand)
-        if community_cards:
-            hand_details['flop'] = community_cards.group(1).split() if community_cards.group(1) else []
-            hand_details['turn'] = community_cards.group(2).split() if community_cards.group(2) else []
-            hand_details['river'] = community_cards.group(3).split() if community_cards.group(3) else []
+        river_card = re.search(r'\*\*\* RIVER \*\*\* \[.*?\] \[.*?\] \[(.*?)\]', hand)
+        if river_card:
+            hand_details['river_cards'] = [river_card.group(1)]
         
         players = re.findall(r'Seat \d+: (\w+) \(\d+ in chips\)', hand)
         hand_details['players'] = players
@@ -32,55 +47,60 @@ def parse_pluribus_txt(file_path):
         hole_cards = re.findall(r'Dealt to (\w+) \[(.*?)\]', hand)
         hand_details['hole_cards'] = {player: cards.split() for player, cards in hole_cards}
         
-        actions = []
         lines = hand.split('\n')
+        current_stage = 'preflop'
+        collecting_showdown = False
+        
         for line in lines:
             if re.match(r'^\*\*\* FLOP \*\*\*', line):
-                actions.append({'player': 'Stage', 'action': 'FLOP', 'amount': '', 'to': ''})
+                current_stage = 'flop'
             elif re.match(r'^\*\*\* TURN \*\*\*', line):
-                actions.append({'player': 'Stage', 'action': 'TURN', 'amount': '', 'to': ''})
+                current_stage = 'turn'
             elif re.match(r'^\*\*\* RIVER \*\*\*', line):
-                actions.append({'player': 'Stage', 'action': 'RIVER', 'amount': '', 'to': ''})
-            else:
-                match = re.match(r'(\w+): (posts small blind|posts big blind|folds|calls|raises|bets|checks) ?(\d+)? ?(to \d+)?', line)
-                if match:
-                    actions.append({
-                        'player': match.group(1), 
-                        'action': match.group(2), 
-                        'amount': match.group(3) if match.group(3) else '', 
-                        'to': match.group(4) if match.group(4) else ''
-                    })
-        
-        hand_details['actions'] = actions
-        
-        winners = []
-        showdowns = []
-        collecting_showdown = False
-        for line in lines:
-            if re.match(r'^\*\*\* SHOWDOWN \*\*\*', line):
+                current_stage = 'river'
+            elif re.match(r'^\*\*\* SHOWDOWN \*\*\*', line):
+                current_stage = 'showdown'
                 collecting_showdown = True
             elif re.match(r'^\*\*\* SUMMARY \*\*\*', line):
+                current_stage = 'summary'
                 collecting_showdown = False
-            
-            if collecting_showdown:
-                match_showdown = re.match(r'(\w+): shows \[(.*?)\]', line)
-                if match_showdown:
-                    showdowns.append({'player': match_showdown.group(1), 'cards': match_showdown.group(2)})
+            else:
+                match = re.match(r'(\w+): (posts small blind|posts big blind|folds|calls|raises|bets|checks) ?(\d+)? ?(to \d+)?', line)
+                uncalled_bet_match = re.match(r'Uncalled bet \((\d+)\) returned to (\w+)', line)
+                if match or uncalled_bet_match:
+                    if match:
+                        action = {
+                            'player': match.group(1),
+                            'action': match.group(2),
+                            'amount': match.group(3) if match.group(3) else '',
+                            'to': match.group(4) if match.group(4) else ''
+                        }
+                    else:
+                        action = {
+                            'player': uncalled_bet_match.group(2),
+                            'action': 'uncalled bet',
+                            'amount': uncalled_bet_match.group(1),
+                            'to': ''
+                        }
+                    if current_stage == 'preflop':
+                        hand_details['preflop_actions'].append(action)
+                    elif current_stage == 'flop':
+                        hand_details['flop_actions'].append(action)
+                    elif current_stage == 'turn':
+                        hand_details['turn_actions'].append(action)
+                    elif current_stage == 'river':
+                        hand_details['river_actions'].append(action)
+                    elif current_stage == 'showdown':
+                        hand_details['showdown_actions'].append(action)
+
+                if collecting_showdown:
+                    match_showdown = re.match(r'(\w+): shows \[(.*?)\]', line)
+                    if match_showdown:
+                        hand_details['showdown_actions'].append({'player': match_showdown.group(1), 'cards': match_showdown.group(2)})
                 
                 match_winner = re.match(r'(\w+) collected (\d+\.?\d*) from pot', line)
                 if match_winner:
-                    winners.append({'player': match_winner.group(1), 'amount': match_winner.group(2)})
-        
-        hand_details['showdowns'] = showdowns
-        hand_details['winners'] = winners
-        
-        if not showdowns:
-            for line in lines:
-                match_winner_summary = re.match(r'(\w+) collected (\d+\.?\d*) from pot', line)
-                if match_winner_summary:
-                    winners.append({'player': match_winner_summary.group(1), 'amount': match_winner_summary.group(2)})
-        
-        hand_details['winners'] = winners
+                    hand_details['winners'].append({'player': match_winner.group(1), 'amount': match_winner.group(2)})
         
         parsed_hands.append(hand_details)
     
@@ -88,25 +108,31 @@ def parse_pluribus_txt(file_path):
 
 def save_to_csv(parsed_hands, csv_file_path):
     with open(csv_file_path, 'w', newline='') as csvfile:
-        fieldnames = ['hand_id', 'flop', 'turn', 'river', 'players', 'hole_cards', 'actions', 'showdowns', 'winners']
+        fieldnames = [
+            'hand_id', 'flop_cards', 'turn_cards', 'river_cards',
+            'players', 'hole_cards', 'preflop_actions', 'flop_actions',
+            'turn_actions', 'river_actions', 'showdown_actions', 'winners'
+        ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
         writer.writeheader()
         for hand in parsed_hands:
             writer.writerow({
                 'hand_id': hand['hand_id'],
-                'flop': ' '.join(hand['flop']),
-                'turn': ' '.join(hand['turn']),
-                'river': ' '.join(hand['river']),
+                'flop_cards': ' '.join(hand['flop_cards']),
+                'turn_cards': ' '.join(hand['turn_cards']),
+                'river_cards': ' '.join(hand['river_cards']),
                 'players': ', '.join(hand['players']),
                 'hole_cards': ', '.join([f'{player}: {" ".join(cards)}' for player, cards in hand['hole_cards'].items()]),
-                'actions': ', '.join([f'{action["player"]}: {action["action"]} {action["amount"]} {action["to"]}'.strip() for action in hand['actions']]),
-                'showdowns': ', '.join([f'{showdown["player"]}: shows [{showdown["cards"]}]' for showdown in hand['showdowns']]),
+                'preflop_actions': ', '.join([f'{action["player"]}: {action["action"]} {action["amount"]} {action["to"]}'.strip() for action in hand['preflop_actions']]),
+                'flop_actions': ', '.join([f'{action["player"]}: {action["action"]} {action["amount"]} {action["to"]}'.strip() for action in hand['flop_actions']]),
+                'turn_actions': ', '.join([f'{action["player"]}: {action["action"]} {action["amount"]} {action["to"]}'.strip() for action in hand['turn_actions']]),
+                'river_actions': ', '.join([f'{action["player"]}: {action["action"]} {action["amount"]} {action["to"]}'.strip() for action in hand['river_actions']]),
+                'showdown_actions': ', '.join([f'{showdown["player"]}: shows [{showdown["cards"]}]' for showdown in hand['showdown_actions']]),
                 'winners': ', '.join([f'{winner["player"]}: collected {winner["amount"]} from pot' for winner in hand['winners']])
             })
 
 def parse_folder_to_csv(folder_path, output_csv_path):
-    
     all_parsed_hands = []
     
     for filename in os.listdir(folder_path):
