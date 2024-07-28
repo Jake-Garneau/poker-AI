@@ -121,7 +121,7 @@ We anticipate developing a model that can accurately make strategic decisions in
 - Create virtual environment: `python -m venv myenv`
 - To activate (bash/zsh): `source myenv/Scripts/activate`
 - To deactivate: `deactivate`
-- In virtual environment: `pip install pandas numpy scikit-learn tensorflow jupyter`
+- In virtual environment: `pip install pandas numpy scikit-learn tensorflow jupyter matplotlib pokerkit deuces`
 - Make sure to select venv as Python interpreter
 
 ## References:
