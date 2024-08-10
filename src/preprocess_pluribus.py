@@ -13,8 +13,8 @@ def parse_pluribus_txt(file_path):
         hand_details = {
             'hand_id': '',
             'flop_cards': [],
-            'turn_cards': [],
-            'river_cards': [],
+            'turn_card': [],
+            'river_card': [],
             'players': [],
             'hole_cards': {},
             'preflop_actions': [],
@@ -35,11 +35,11 @@ def parse_pluribus_txt(file_path):
             
         turn_card = re.search(r'\*\*\* TURN \*\*\* \[.*?\] \[(.*?)\]', hand)
         if turn_card:
-            hand_details['turn_cards'] = [turn_card.group(1)]
+            hand_details['turn_card'] = [turn_card.group(1)]
         
         river_card = re.search(r'\*\*\* RIVER \*\*\* \[.*?\] \[.*?\] \[(.*?)\]', hand)
         if river_card:
-            hand_details['river_cards'] = [river_card.group(1)]
+            hand_details['river_card'] = [river_card.group(1)]
         
         players = re.findall(r'Seat \d+: (\w+) \(\d+ in chips\)', hand)
         hand_details['players'] = players
@@ -109,7 +109,7 @@ def parse_pluribus_txt(file_path):
 def save_to_csv(parsed_hands, csv_file_path):
     with open(csv_file_path, 'w', newline='') as csvfile:
         fieldnames = [
-            'hand_id', 'flop_cards', 'turn_cards', 'river_cards',
+            'hand_id', 'flop_cards', 'turn_card', 'river_card',
             'players', 'hole_cards', 'preflop_actions', 'flop_actions',
             'turn_actions', 'river_actions', 'showdown_actions', 'winners'
         ]
@@ -120,8 +120,8 @@ def save_to_csv(parsed_hands, csv_file_path):
             writer.writerow({
                 'hand_id': hand['hand_id'],
                 'flop_cards': ' '.join(hand['flop_cards']),
-                'turn_cards': ' '.join(hand['turn_cards']),
-                'river_cards': ' '.join(hand['river_cards']),
+                'turn_card': ' '.join(hand['turn_card']),
+                'river_card': ' '.join(hand['river_card']),
                 'players': ', '.join(hand['players']),
                 'hole_cards': ', '.join([f'{player}: {" ".join(cards)}' for player, cards in hand['hole_cards'].items()]),
                 'preflop_actions': ', '.join([f'{action["player"]}: {action["action"]} {action["amount"]} {action["to"]}'.strip() for action in hand['preflop_actions']]),

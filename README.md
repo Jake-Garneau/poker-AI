@@ -1,10 +1,5 @@
 # Analyzing Poker Hand Data and Developing a Poker Playing Neural Network
 
-## Team Members:
-
-- Rusheel Dasari (rdasari2)
-- Jake Garneau (jgarneau)
-
 ## Overview:
 
 This project aims to analyze poker game data and develop a neural network model capable of playing no-limit Texas hold’em (NLHE) poker. We will use a dataset of tracked poker games released by the Pluribus (Poker bot built by Facebook's AI Lab and Carnegie Mellon University) research team to train and evaluate our model, and then a similar Kaggle dataset of recorded poker games to further validate its performance.
@@ -85,7 +80,6 @@ We anticipate developing a model that can accurately make strategic decisions in
 ### Links:
 
 - Git repo: https://github.com/Jake-Garneau/poker-AI
-- Task board: https://trello.com/b/u0MGmloA/poker-ai
 
 ### By July 13:
 
@@ -121,7 +115,7 @@ We anticipate developing a model that can accurately make strategic decisions in
 - Create virtual environment: `python -m venv myenv`
 - To activate (bash/zsh): `source myenv/Scripts/activate`
 - To deactivate: `deactivate`
-- In virtual environment: `pip install pandas numpy scikit-learn tensorflow jupyter matplotlib pokerkit deuces`
+- In virtual environment: `pip install pandas numpy scikit-learn tensorflow jupyter matplotlib pokerkit deuces keras-tuner`
 - Make sure to select venv as Python interpreter
 
 ## References:
@@ -130,6 +124,12 @@ We anticipate developing a model that can accurately make strategic decisions in
 2. https://www.youtube.com/watch?v=2dX0lwaQRX0
 3. https://www.science.org/doi/10.1126/science.aay2400
 4. https://pokercopilot.com/essential-poker-statistics
+5. Deuces - https://github.com/worldveil/deuces: written for the MIT Pokerbots Competition, used to evaluate poker hands of 2 and 5-7, useful for evaluating Texas Holdem hands from pre-flop to river.
+6. Pokerkit - https://github.com/uoftcprg/pokerkit: an open-source software library for simulating games, evaluating hands, and facilitating statistical analysis, developed by the University of Toronto Computer Poker Student Research Group.
+7. https://github.com/dickreuter/Poker - poker bot with strategy analyzer and strategy editor
+8. https://github.com/fedden/poker_ai - another open-source poker bot
+9. https://neptune.ai/blog/monte-carlo-simulation
+10. https://stackoverflow.com/questions/33312405/how-to-speed-up-monte-carlo-simulation-in-python
 
 ## Player Statistics from Reference 4
 

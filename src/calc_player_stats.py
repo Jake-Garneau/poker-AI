@@ -1,6 +1,7 @@
 import pandas as pd
+import csv
 
-df = pd.read_csv("../data/pluribus_test.csv")
+df = pd.read_csv("../data/pluribus_parsed.csv")
 
 player_stats = {}
 big_blind = 100
@@ -108,11 +109,9 @@ for _, row in df.iterrows():
         update_stats(big_blind_player, 'walks')
 
 for player, stats in player_stats.items():
-    if player == 'MrPink':
-        print(stats)
+
     vpip_hands = stats['total_hands'] - stats['walks']
     agg_div = stats['bets'] + stats['raises'] + stats['calls'] + stats['folds']
-    print(player + ' total hands played: ' + str(stats['total_hands_played']))
     vpip = (stats['hands_vpip'] / vpip_hands) * 100 if vpip_hands > 0 else 0
     pfr = (stats['hands_pfr'] / stats['total_hands_played']) * 100 if stats['total_hands_played'] > 0 else 0
     agg = ((stats['bets'] + stats['raises']) / agg_div) * 100 if agg_div > 0 else 0
@@ -125,13 +124,16 @@ for player, stats in player_stats.items():
         'BB_won_per_100': bb_won_per_100
     })
 
-txt_file_path = '../data/player_stats.txt'
+csv_file_path = '../data/player_stats_pluribus.csv'
 
-with open(txt_file_path, mode='w') as file:
+with open(csv_file_path, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Player', 'VPIP', 'PFR', 'Agg', 'BB_won_per_100'])
     for player, stats in player_stats.items():
-        file.write(f"Player: {player}\n")
-        file.write(f"  VPIP: {stats['VPIP']:.2f}%\n")
-        file.write(f"  PFR: {stats['PFR']:.2f}%\n")
-        file.write(f"  Agg: {stats['Agg']:.2f}%\n")
-        file.write(f"  BB won per 100 hands: {stats['BB_won_per_100']:.2f}\n")
-        file.write("\n")
+        writer.writerow([
+            player,
+            f"{stats['VPIP']:.2f}",
+            f"{stats['PFR']:.2f}",
+            f"{stats['Agg']:.2f}",
+            f"{stats['BB_won_per_100']:.2f}"
+        ])
