@@ -44,7 +44,7 @@ def parse_archive_txt(file_path):
             hand_details['river_card'] = [river_card.group(1)]
         
         # Extract player names
-        players = re.findall(r'Seat \d+: (\w+)', hand)
+        players = re.findall(r'Seat \d+: ([\w\.\!\?\=\(\)\-\_\s]+?) \(\d+(?:\.\d+)?\)', hand)
         hand_details['players'] = players
         
         for player in players:
@@ -58,7 +58,7 @@ def parse_archive_txt(file_path):
         current_stage = 'preflop'
         
         for line in hand.split('\n'):
-            if re.match(r'^Player \w+ raises|Player \w+ folds|Player \w+ bets|Player \w+ calls|Player \w+ checks|Uncalled bet', line):
+            if re.match(r'^Player ([\w\.\!\?\=\(\)\-\_\s]+?) raises|Player ([\w\.\!\?\=\(\)\-\_\s]+?) folds|Player ([\w\.\!\?\=\(\)\-\_\s]+?) bets|Player ([\w\.\!\?\=\(\)\-\_\s]+?) calls|Player ([\w\.\!\?\=\(\)\-\_\s]+?) checks|Uncalled bet', line):
                 action = parse_action(line)
                 if action:
                     if current_stage == 'preflop':
@@ -92,8 +92,8 @@ def parse_archive_txt(file_path):
     return parsed_hands
 
 def parse_action(line):
-    match = re.match(r'Player (\w+) (posts small blind|posts big blind|folds|calls|raises|bets|checks)(?: \((\d+(?:\.\d+)?)\))?', line)
-    uncalled_bet_match = re.match(r'Uncalled bet \((\d+)\) returned to (\w+)', line)
+    match = re.match(r'Player ([\w\.\!\?\=\(\)\-\_\s]+?) (posts small blind|posts big blind|folds|calls|raises|bets|checks)(?: \((\d+(?:\.\d+)?)\))?', line)
+    uncalled_bet_match = re.match(r'Uncalled bet \((\d+(?:\.\d+)?)\) returned to ([\w\.\!\?\=\(\)\-\_\s]+?)', line)
     if match:
         action = match.group(2)
         amount = match.group(3) if match.group(3) else ''
@@ -111,23 +111,24 @@ def parse_action(line):
     return None
 
 def parse_showdown_summary_action(line):
-    show_match = re.match(r'\*Player (\w+) shows: .* \[(.*?)\]. Bets: (\d+\.\d+). Collects: (\d+\.\d+)(?:. Wins: \d+\.\d+|. Loses: \d+\.\d+)?', line)
-    no_show_match = re.match(r'\*Player (\w+) mucks \(does not show cards\)\. Bets: (\d+(?:\.\d+)?)\. Collects: (\d+(?:\.\d+)?)\. Wins: (\d+(?:\.\d+)?)', line)
+    show_match = re.match(r'\*Player ([\w\.\!\?\=\(\)\-\_\s]+?) shows: .* \[(.*?)\]\. Bets: (\d+(?:\.\d+)?)\. Collects: (\d+(?:\.\d+)?)\..*', line)
+    no_show_match = re.match(r'\*Player ([\w\.\!\?\=\(\)\-\_\s]+?) mucks \(does not show cards\)\. Bets: (\d+(?:\.\d+)?)\. Collects: (\d+(?:\.\d+)?)\..*', line)
     if show_match:
         return {
             'player': show_match.group(1),
             'cards': show_match.group(2),
-            'summary': f"{show_match.group(1)} collected {show_match.group(3)} from pot"
+            'summary': f"{show_match.group(1)}: collected {show_match.group(3)} from pot"
         }
     elif no_show_match:
         return {
             'player': no_show_match.group(1),
             'cards': '?? ??',
-            'summary': f"{no_show_match.group(1)} collected {no_show_match.group(2)} from pot"
+            'summary': f"{no_show_match.group(1)}: collected {no_show_match.group(2)} from pot"
         }
     return None
 
 def save_to_csv(parsed_hands, csv_file_path):
+    no_winners = []
     with open(csv_file_path, 'w', newline='') as csvfile:
         fieldnames = [
             'hand_id', 'flop_cards', 'turn_card', 'river_card',
@@ -137,6 +138,10 @@ def save_to_csv(parsed_hands, csv_file_path):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for hand in parsed_hands:
+            if hand['hand_id'] == '':
+                continue
+            if(len(hand['winners']) == 0):
+                no_winners.append(hand['hand_id'])
             writer.writerow({
                 'hand_id': hand['hand_id'],
                 'flop_cards': ' '.join(hand['flop_cards']),
@@ -152,7 +157,7 @@ def save_to_csv(parsed_hands, csv_file_path):
                 'winners': ', '.join(hand['winners']),
                 
             })
-
+    print(f'No winners for hands: {no_winners}')
 def parse_folder_to_csv(folder_path, output_csv_path):
     all_parsed_hands = []
     

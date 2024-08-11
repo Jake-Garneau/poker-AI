@@ -1,2 +1,6 @@
 /data
 /myenv
+/temp
+/old_models
+/notebooks/my_dir_fold_[1-5]
+/notebooks/my_dir_fold_[7-8]

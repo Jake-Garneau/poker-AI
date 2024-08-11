@@ -1,11 +1,12 @@
 import pandas as pd
 import csv
 
-df = pd.read_csv("../data/pluribus_parsed.csv")
+df = pd.read_csv("../data/archive_parsed.csv")
+csv_file_path = '../data/player_stats_archive.csv'
 
 player_stats = {}
-big_blind = 100
-small_blind = 50
+big_blind = 2
+small_blind = 1
 
 def update_stats(player, stat_type, value=1):
     if player not in player_stats:
@@ -98,11 +99,12 @@ for _, row in df.iterrows():
     update_action_stats(turn_actions)
     update_action_stats(river_actions)
     
-    if 'collected' in winners:
-        winner_parts = winners.split(': collected ')
-        player = winner_parts[0]
-        amount = float(winner_parts[1].split(' ')[0])
-        update_stats(player, 'winnings', amount)
+    for winner in row['winners'].split(', '):
+        if 'collected' in winners:
+            winner_parts = winners.split(': collected ')
+            player = winner_parts[0]
+            amount = float(winner_parts[1].split(' ')[0])
+            update_stats(player, 'winnings', amount)
     
     if len(preflop_actions) == 7 and all(['posts' or 'folds' in action for action in preflop_actions]):
         big_blind_player = preflop_actions[1].split(': ')[0]
@@ -123,8 +125,6 @@ for player, stats in player_stats.items():
         'Agg': agg,
         'BB_won_per_100': bb_won_per_100
     })
-
-csv_file_path = '../data/player_stats_pluribus.csv'
 
 with open(csv_file_path, mode='w', newline='') as file:
     writer = csv.writer(file)

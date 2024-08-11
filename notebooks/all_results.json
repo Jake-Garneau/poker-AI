@@ -1,0 +1,168 @@
+[
+    {
+        "fold": 1,
+        "best_hp": {
+            "units_input": 192,
+            "num_layers": 1,
+            "units_0": 96,
+            "learning_rate": 0.01,
+            "units_1": 64,
+            "units_2": 64,
+            "use_dropout_input": true,
+            "use_dropout_0": true,
+            "dropout_input": 0.0,
+            "dropout_0": 0.0
+        },
+        "val_accuracy": 0.8379665315151215,
+        "precision": 0.6666666666666666,
+        "recall": 0.006344171292624901,
+        "f1_score": 0.012568735271013355
+    },
+    {
+        "fold": 2,
+        "best_hp": {
+            "units_input": 192,
+            "use_dropout_input": true,
+            "num_layers": 1,
+            "units_0": 96,
+            "use_dropout_0": false,
+            "learning_rate": 0.0001,
+            "dropout_input": 0.30000000000000004,
+            "units_1": 96,
+            "use_dropout_1": true,
+            "units_2": 96,
+            "use_dropout_2": true,
+            "dropout_2": 0.30000000000000004
+        },
+        "val_accuracy": 0.8373873829841614,
+        "precision": 0.7368421052631579,
+        "recall": 0.011014948859166011,
+        "f1_score": 0.021705426356589147
+    },
+    {
+        "fold": 3,
+        "best_hp": {
+            "units_input": 192,
+            "use_dropout_input": false,
+            "num_layers": 1,
+            "units_0": 128,
+            "use_dropout_0": false,
+            "learning_rate": 0.001,
+            "dropout_input": 0.0,
+            "dropout_0": 0.4
+        },
+        "val_accuracy": 0.8420002460479736,
+        "precision": 0.6538461538461539,
+        "recall": 0.013765182186234818,
+        "f1_score": 0.02696272799365583
+    },
+    {
+        "fold": 4,
+        "best_hp": {
+            "units_input": 256,
+            "use_dropout_input": true,
+            "num_layers": 1,
+            "units_0": 64,
+            "use_dropout_0": true,
+            "learning_rate": 0.001,
+            "units_1": 32,
+            "use_dropout_1": false,
+            "units_2": 96,
+            "use_dropout_2": true,
+            "dropout_input": 0.0,
+            "dropout_0": 0.0
+        },
+        "val_accuracy": 0.8439310193061829,
+        "precision": 0.7,
+        "recall": 0.005756578947368421,
+        "f1_score": 0.011419249592169658
+    },
+    {
+        "fold": 5,
+        "best_hp": {
+            "units_input": 64,
+            "use_dropout_input": true,
+            "num_layers": 2,
+            "units_0": 32,
+            "use_dropout_0": true,
+            "learning_rate": 0.001,
+            "dropout_input": 0.0,
+            "dropout_0": 0.2,
+            "units_1": 96,
+            "use_dropout_1": true,
+            "units_2": 32,
+            "use_dropout_2": true,
+            "dropout_1": 0.0
+        },
+        "val_accuracy": 0.8389110565185547,
+        "precision": 0.6666666666666666,
+        "recall": 0.0031923383878691143,
+        "f1_score": 0.006354249404289118
+    },
+    {
+        "fold": 6,
+        "best_hp": {
+            "units_input": 64,
+            "use_dropout_input": false,
+            "num_layers": 1,
+            "units_0": 128,
+            "use_dropout_0": true,
+            "learning_rate": 0.001,
+            "dropout_input": 0.4,
+            "units_1": 128,
+            "use_dropout_1": false,
+            "units_2": 32,
+            "use_dropout_2": false,
+            "dropout_0": 0.30000000000000004,
+            "dropout_1": 0.2,
+            "dropout_2": 0.0
+        },
+        "val_accuracy": 0.84515380859375,
+        "precision": 0.5185185185185185,
+        "recall": 0.011627906976744186,
+        "f1_score": 0.022745735174654752
+    },
+    {
+        "fold": 7,
+        "best_hp": {
+            "units_input": 128,
+            "use_dropout_input": false,
+            "num_layers": 3,
+            "units_0": 32,
+            "use_dropout_0": true,
+            "learning_rate": 0.0001,
+            "dropout_input": 0.0,
+            "units_1": 64,
+            "use_dropout_1": false,
+            "units_2": 32,
+            "use_dropout_2": false,
+            "dropout_0": 0.2,
+            "dropout_1": 0.4,
+            "dropout_2": 0.2
+        },
+        "val_accuracy": 0.8400695025920868,
+        "precision": 1.0,
+        "recall": 0.0008045052292839903,
+        "f1_score": 0.001607717041800643
+    },
+    {
+        "fold": 8,
+        "best_hp": {
+            "units_input": 256,
+            "use_dropout_input": false,
+            "num_layers": 3,
+            "units_0": 32,
+            "use_dropout_0": false,
+            "learning_rate": 0.001,
+            "dropout_0": 0.30000000000000004,
+            "units_1": 32,
+            "use_dropout_1": false,
+            "units_2": 32,
+            "use_dropout_2": false
+        },
+        "val_accuracy": 0.8418071866035461,
+        "precision": 1.0,
+        "recall": 0.0016246953696181965,
+        "f1_score": 0.0032441200324412004
+    }
+]
